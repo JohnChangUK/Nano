@@ -7,16 +7,16 @@ import okhttp3.Response;
 
 import java.io.IOException;
 
-class HttpClient {
+public class HttpClient {
 
     private final OkHttpClient client = new OkHttpClient();
     private final String host;
 
-    HttpClient(String host) {
+    public HttpClient(String host) {
         this.host = host;
     }
 
-    String post(String body) throws IOException {
+    public String post(String body) throws IOException {
         okhttp3.Request request = new okhttp3.Request.Builder()
             .post(RequestBody.create(MediaType.parse("application/json"), body))
             .url(host)
