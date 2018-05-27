@@ -7,3 +7,4 @@ bin/
 target/
 *.iml
 build/
+application.properties

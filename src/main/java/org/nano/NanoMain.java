@@ -1,7 +1,5 @@
 package org.nano;
 
-import com.nano.client.Balance;
-import com.nano.client.NanoClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
