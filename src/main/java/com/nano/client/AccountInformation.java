@@ -1,12 +1,19 @@
 package com.nano.client;
 
-public class AccountInformation extends BaseResponse {
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+public class AccountInformation extends BaseResponse {
+    @JsonProperty("frontier")
     private String frontier;
+    @JsonProperty("open_block")
     private String openBlock;
+    @JsonProperty("representative_block")
     private String representativeBlock;
+    @JsonProperty("balance")
     private String balance;
+    @JsonProperty("modified_timestamp")
     private String modifiedTimestamp;
+    @JsonProperty("block_count")
     private String blockCount;
     private String representative;
     private String weight;

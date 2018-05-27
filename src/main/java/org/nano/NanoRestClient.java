@@ -1,50 +1,43 @@
 package org.nano;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nano.client.AccountInformation;
+import com.nano.client.AccountPublicKey;
 import com.nano.client.Balance;
-import com.nano.client.BlockCount;
-import com.nano.client.NanoClient;
+import com.nano.client.BaseResponse;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
 import java.io.IOException;
-
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 @RestController
 @RequestMapping("/")
-public class NanoRestClient implements CommandLineRunner {
+public class NanoRestClient {
 
     private static final Logger log = LoggerFactory.getLogger(NanoRestClient.class);
-
-    @Value("${API_KEY}")
-    private String API_KEY;
 
     @Autowired
     private RestTemplate restTemplate;
 
+    @Value("${API_KEY}")
+    private String API_KEY;
     private String url = "https://api.nanode.co";
-    String apiKey = "20e7f841-5d45-11e8-bd27-d37637e19002";
 
     @RequestMapping(method = RequestMethod.GET, value = "/init")
-    public void initialise() throws IOException {
+    public void getBlockCount() throws IOException {
 
-        BlockCount blockCount = ClientBuilder.newClient()
-                .target(url).request()
-                .accept(APPLICATION_JSON_TYPE)
-                .header("Authorization", apiKey)
-                .post(Entity.entity("{\"action\":\"block_count\"}", APPLICATION_JSON_TYPE))
-                .readEntity(BlockCount.class);
-
-       /* String payload = "{\"action\":\"block_count\"}";
+        String payload = "{\"action\": \"account_info\", " +
+                "\"account\": \"xrb_1niabkx3gbxit5j5yyqcpas71dkffggbr6zpd3heui8rpoocm5xqbdwq44oh\"}";
         StringEntity entity = new StringEntity(payload);
 
         org.apache.http.client.HttpClient httpClient = HttpClientBuilder.create().build();
@@ -52,27 +45,54 @@ public class NanoRestClient implements CommandLineRunner {
         post.setEntity(entity);
         post.setHeader("Content-Type", "application/json");
         post.setHeader("Accept", "application/json");
-        post.setHeader("Authorization", apiKey);
+        post.setHeader("Authorization", API_KEY);
 
         HttpResponse response = httpClient.execute(post);
         System.out.println("Response Code: " + response.getStatusLine().getStatusCode());
         ObjectMapper mapper = new ObjectMapper();
-        BlockCount blockCount = mapper.readValue(response.getEntity().getContent(), BlockCount.class);*/
-        System.out.println("RES: " + blockCount.getCount() + " " + blockCount.getUnchecked());
+        AccountInformation accountInformation = mapper.readValue(response.getEntity().getContent(), AccountInformation.class);
+        System.out.println("RES: " + accountInformation.getOpenBlock() + " " + accountInformation.getBalance());
     }
 
     @RequestMapping("/balance")
-    public void nanoRpcRequest() {
+    public String balance() {
+        NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
 
-        NanoClient nanoClient = new NanoClient();
-        Balance balance = nanoClient.getAccountBalance("xrb_3pczxuorp48td8645bs3m6c3xotxd3idskrenmi65rbrga5zmkemzhwkaznh");
+        BaseResponse balanceResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_balance\", " +
+                "\"account\":\"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\"}", Balance.class);
 
-        log.info("Balance: {}", balance);
+        Balance balance = (Balance) balanceResponse;
+
+        return "Balance: " + balance.getBalance() + "<br>" +
+                "Pending Balance: " + balance.getPending();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/test")
-    public String test() {
-        return "Test";
+    @RequestMapping("/accountInfo")
+    public String accountInformation() {
+        NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
+
+        BaseResponse accountInformationResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_info\", " +
+                "\"account\": \"xrb_1niabkx3gbxit5j5yyqcpas71dkffggbr6zpd3heui8rpoocm5xqbdwq44oh\"}", AccountInformation.class);
+
+        AccountInformation accountInformation = (AccountInformation) accountInformationResponse;
+
+        return "Balance: " + accountInformation.getBalance() + "<br>" +
+                "Frontier: " + accountInformation.getFrontier() + "<br>" +
+                "OpenBlock: " + accountInformation.getOpenBlock() + "<br>" +
+                "Representative Block: " + accountInformation.getRepresentativeBlock() + "<br>" +
+                "Modified Timestamp: " + accountInformation.getModifiedTimestamp();
+    }
+
+    @RequestMapping("/accountPublicKey")
+    public String accountPublicKey() {
+        NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
+
+        BaseResponse accountPublicKeyResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_key\", " +
+                "\"account\":\"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\"}", AccountPublicKey.class);
+
+        AccountPublicKey accountPublicKey = (AccountPublicKey) accountPublicKeyResponse;
+
+        return "Account Public Key: " + accountPublicKey.getKey();
     }
 
     @RequestMapping("/logApiKey")

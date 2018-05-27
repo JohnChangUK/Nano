@@ -1,6 +1,6 @@
 package com.nano.client;
 
-abstract class BaseResponse {
+public abstract class BaseResponse {
 
     private String error;
 
