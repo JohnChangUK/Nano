@@ -1,10 +1,7 @@
 package org.nano;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nano.client.AccountInformation;
-import com.nano.client.AccountPublicKey;
-import com.nano.client.Balance;
-import com.nano.client.BaseResponse;
+import com.nano.client.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -33,25 +30,17 @@ public class NanoRestClient {
     private String API_KEY;
     private String url = "https://api.nanode.co";
 
-    @RequestMapping(method = RequestMethod.GET, value = "/init")
-    public void getBlockCount() throws IOException {
+    @RequestMapping(method = RequestMethod.GET, value = "/accountHistory")
+    public String getAccountHistory() throws IOException {
+        NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
 
-        String payload = "{\"action\": \"account_info\", " +
-                "\"account\": \"xrb_1niabkx3gbxit5j5yyqcpas71dkffggbr6zpd3heui8rpoocm5xqbdwq44oh\"}";
-        StringEntity entity = new StringEntity(payload);
+        BaseResponse baseResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_history\", " +
+                "\"account\": \"xrb_3hmcxznhr6edmq14gmwaxwippcjhb5m6fs5633qktk688iysbnq96oyrtbe7\", + " +
+                "\"count\", \"1\"}", AccountHistory.class);
 
-        org.apache.http.client.HttpClient httpClient = HttpClientBuilder.create().build();
-        HttpPost post = new HttpPost(url);
-        post.setEntity(entity);
-        post.setHeader("Content-Type", "application/json");
-        post.setHeader("Accept", "application/json");
-        post.setHeader("Authorization", API_KEY);
+        AccountHistory accountHistory = (AccountHistory) baseResponse;
 
-        HttpResponse response = httpClient.execute(post);
-        System.out.println("Response Code: " + response.getStatusLine().getStatusCode());
-        ObjectMapper mapper = new ObjectMapper();
-        AccountInformation accountInformation = mapper.readValue(response.getEntity().getContent(), AccountInformation.class);
-        System.out.println("RES: " + accountInformation.getOpenBlock() + " " + accountInformation.getBalance());
+        return "Account History: " + accountHistory.getHistory();
     }
 
     @RequestMapping("/balance")

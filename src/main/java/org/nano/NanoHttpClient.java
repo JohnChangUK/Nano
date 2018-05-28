@@ -3,8 +3,10 @@ package org.nano;
 import com.google.common.base.Objects;
 import com.nano.client.BaseResponse;
 
+import javax.ws.rs.Produces;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.MediaType;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
@@ -23,7 +25,7 @@ public class NanoHttpClient {
         return ClientBuilder.newClient()
                 .target(url).request()
                 .accept(APPLICATION_JSON_TYPE)
-                .header("Authorization", this.API_KEY)
+                .header("Authorization", API_KEY)
                 .post(Entity.entity(entity, APPLICATION_JSON_TYPE))
                 .readEntity(baseResponseClass);
     }
