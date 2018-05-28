@@ -1,28 +1,21 @@
 package org.nano;
 
-import com.nano.client.AccountHistory;
-import com.nano.client.AccountInformation;
-import com.nano.client.AccountPublicKey;
-import com.nano.client.AccountRepresentative;
-import com.nano.client.AccountWeight;
-import com.nano.client.AvailableSupply;
-import com.nano.client.Balance;
-import com.nano.client.BaseResponse;
-import com.nano.client.BlockCount;
+import com.nano.client.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
 @RequestMapping("/")
-public class NanoRestClient {
+public class NanoRestController {
 
-    private static final Logger log = LoggerFactory.getLogger(NanoRestClient.class);
+    private static final Logger log = LoggerFactory.getLogger(NanoRestController.class);
 
     @Autowired
     private RestTemplate restTemplate;
@@ -30,26 +23,29 @@ public class NanoRestClient {
     @Value("${API_KEY}")
     private String API_KEY;
     private String url = "https://api.nanode.co";
+    @Value("${binanceAddress}")
+    private String binanceAddress;
 
     @RequestMapping(method = RequestMethod.GET, value = "/accountHistory")
     public String getAccountHistory() {
         NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
 
         BaseResponse baseResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_history\", " +
-                "\"account\": \"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\", + " +
-                "\"count\", \"1\"}", AccountHistory.class);
+                "\"account\": \"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\", " +
+                "\"count\": \"1\"}", AccountHistory.class);
 
         AccountHistory accountHistory = (AccountHistory) baseResponse;
 
+        System.out.println(accountHistory.getHistory());
         return "Account History: " + accountHistory.getHistory();
     }
 
     @RequestMapping("/accountRep")
-    public String getAccountList() {
+    public String getAccountRep() {
         NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
 
         BaseResponse baseResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_representative\", " +
-                "\"account\": \"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\", + ", AccountRepresentative.class);
+                "\"account\":\"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\"}", AccountRepresentative.class);
 
         AccountRepresentative accountRepresentative = (AccountRepresentative) baseResponse;
 
@@ -57,11 +53,11 @@ public class NanoRestClient {
     }
 
     @RequestMapping("/balance")
-    public String balance() {
+    public String balance(@RequestParam(value = "address", defaultValue = "${binanceAddress}") String address) {
         NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
 
         BaseResponse balanceResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_balance\", " +
-                "\"account\":\"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\"}", Balance.class);
+                "\"account\":" + "\"" + address + "\"" + "}", Balance.class);
 
         Balance balance = (Balance) balanceResponse;
 
@@ -108,7 +104,7 @@ public class NanoRestClient {
         NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
 
         BaseResponse accountInformationResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_info\", " +
-                "\"account\": \"xrb_1niabkx3gbxit5j5yyqcpas71dkffggbr6zpd3heui8rpoocm5xqbdwq44oh\"}", AccountInformation.class);
+                "\"account\":" + "\"" + binanceAddress + "\"" + "}", AccountInformation.class);
 
         AccountInformation accountInformation = (AccountInformation) accountInformationResponse;
 
