@@ -8,6 +8,9 @@ import java.util.List;
 @JsonIgnoreProperties
 public class AccountHistory extends BaseResponse {
 
+    public AccountHistory() {
+    }
+
     @JsonProperty("history")
     private List<History> history;
 

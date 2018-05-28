@@ -1,11 +1,14 @@
 package org.nano;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nano.client.*;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClientBuilder;
+import com.nano.client.AccountHistory;
+import com.nano.client.AccountInformation;
+import com.nano.client.AccountPublicKey;
+import com.nano.client.AccountRepresentative;
+import com.nano.client.AccountWeight;
+import com.nano.client.AvailableSupply;
+import com.nano.client.Balance;
+import com.nano.client.BaseResponse;
+import com.nano.client.BlockCount;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +17,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
-
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/")
@@ -31,16 +32,28 @@ public class NanoRestClient {
     private String url = "https://api.nanode.co";
 
     @RequestMapping(method = RequestMethod.GET, value = "/accountHistory")
-    public String getAccountHistory() throws IOException {
+    public String getAccountHistory() {
         NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
 
         BaseResponse baseResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_history\", " +
-                "\"account\": \"xrb_3hmcxznhr6edmq14gmwaxwippcjhb5m6fs5633qktk688iysbnq96oyrtbe7\", + " +
+                "\"account\": \"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\", + " +
                 "\"count\", \"1\"}", AccountHistory.class);
 
         AccountHistory accountHistory = (AccountHistory) baseResponse;
 
         return "Account History: " + accountHistory.getHistory();
+    }
+
+    @RequestMapping("/accountRep")
+    public String getAccountList() {
+        NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
+
+        BaseResponse baseResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_representative\", " +
+                "\"account\": \"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\", + ", AccountRepresentative.class);
+
+        AccountRepresentative accountRepresentative = (AccountRepresentative) baseResponse;
+
+        return "Account Rep: " + accountRepresentative.getRepresentative();
     }
 
     @RequestMapping("/balance")
@@ -54,6 +67,40 @@ public class NanoRestClient {
 
         return "Balance: " + balance.getBalance() + "<br>" +
                 "Pending Balance: " + balance.getPending();
+    }
+
+    @RequestMapping("/accountWeight")
+    public String accountWeight() {
+        NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
+
+        BaseResponse baseResponse = nanoHttpClient.rpcRequest("{\"action\": \"account_weight\", " +
+                "\"account\":\"xrb_1ipx847tk8o46pwxt5qjdbncjqcbwcc1rrmqnkztrfjy5k7z4imsrata9est\"}", AccountWeight.class);
+
+        AccountWeight accountWeight = (AccountWeight) baseResponse;
+
+        return "Account Weight: " + accountWeight.getWeight() + "<br>";
+    }
+
+    @RequestMapping("/availableSupply")
+    public String availableSupply() {
+        NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
+
+        BaseResponse baseResponse = nanoHttpClient.rpcRequest("{\"action\": \"available_supply\"}", AvailableSupply.class);
+
+        AvailableSupply availableSupply = (AvailableSupply) baseResponse;
+
+        return "Available Supply: " + availableSupply.getAvailable() + "<br>";
+    }
+
+    @RequestMapping("/blockCount")
+    public String blockCount() {
+        NanoHttpClient nanoHttpClient = new NanoHttpClient(url, API_KEY);
+
+        BaseResponse baseResponse = nanoHttpClient.rpcRequest("{\"action\": \"block_count\"}", BlockCount.class);
+
+        BlockCount blockCount = (BlockCount) baseResponse;
+
+        return "Block Count: " + blockCount.getCount() + "<br>";
     }
 
     @RequestMapping("/accountInfo")

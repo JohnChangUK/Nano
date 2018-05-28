@@ -3,10 +3,8 @@ package org.nano;
 import com.google.common.base.Objects;
 import com.nano.client.BaseResponse;
 
-import javax.ws.rs.Produces;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.core.MediaType;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
@@ -38,12 +36,12 @@ public class NanoHttpClient {
         this.url = url;
     }
 
-    public String getAPIKEY() {
+    public String getAPI_KEY() {
         return API_KEY;
     }
 
-    public void setAPIKEY(String APIKEY) {
-        this.API_KEY = APIKEY;
+    public void setAPI_KEY(String API_KEY) {
+        this.API_KEY = API_KEY;
     }
 
     @Override

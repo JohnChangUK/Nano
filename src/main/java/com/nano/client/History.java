@@ -2,6 +2,9 @@ package com.nano.client;
 
 public class History {
 
+    public History() {
+    }
+
     private String hash;
     private String type;
     private String account;
